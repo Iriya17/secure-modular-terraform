@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   terraform:
@@ -27,11 +28,17 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::375336688989:role/GitHubActionsTerraformPlan
+          aws-region: ap-south-1
+
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Validate
         run: terraform validate
@@ -41,3 +48,6 @@ jobs:
         with:
           directory: ${{ github.workspace }}
           soft_fail: true
+
+      - name: Terraform Plan
+        run: terraform plan -no-color
